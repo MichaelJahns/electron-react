@@ -1,28 +1,34 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import axios from 'axios';
+import Position from './components/position'
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+export default class App extends Component {
+  state={ positions: []}
+  componentDidMount(){
+    this.refreshPositions()
+    this.timerID = setInterval(
+      () => this.refreshPositions(), 30000
     );
   }
+  render() {
+    return (
+      <ul>
+        {this.state.positions.map(position => 
+          <Position key={position.symbol} className="flex-container" position={position}/>
+        )} 
+       </ul>
+      
+    );
+  }
+  refreshPositions(){
+    axios.get("https://api.tdameritrade.com/v1/marketdata/quotes?apikey=MICHAEL&symbol=AMZN%2CEA%2CFB%2CGOOG%2C%20NVDA")
+    .then(response => {
+      let result = Object.values(response.data)
+      this.setState({positions: result})
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  }
 }
-
-export default App;
